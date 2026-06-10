@@ -108,7 +108,7 @@ async def join_session(token: str, body: JoinRequest, db: AsyncSession = Depends
     db.add(player)
     await db.commit()
     await db.refresh(player)
-    # Reload and broadcast
+    db.expire_all()
     session = await _load_session(token, db)
     await manager.broadcast(token, {"event": "player_joined", "state": _session_out(session)})
     return {"player_id": player.id, "name": player.name}
@@ -134,7 +134,7 @@ async def start_draft(
     session.status = "drafting"
     session.current_pick_index = 0
     await db.commit()
-
+    db.expire_all()
     session = await _load_session(token, db)
     await manager.broadcast(token, {"event": "draft_started", "state": _session_out(session)})
     return _session_out(session)
@@ -171,7 +171,7 @@ async def make_pick(token: str, body: PickRequest, db: AsyncSession = Depends(ge
     if session.current_pick_index >= TOTAL_PICKS:
         session.status = "complete"
     await db.commit()
-
+    db.expire_all()
     session = await _load_session(token, db)
     event = "draft_complete" if session.status == "complete" else "pick_made"
     await manager.broadcast(token, {"event": event, "state": _session_out(session)})
