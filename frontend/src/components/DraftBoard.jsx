@@ -1,0 +1,182 @@
+import { useState, useEffect, useRef } from "react";
+import { getTeams, startDraft, makePick, openSessionSocket } from "../api";
+
+export default function DraftBoard({ sessionToken, adminToken, playerId, playerName }) {
+  const [teams, setTeams] = useState([]);
+  const [session, setSession] = useState(null);
+  const [error, setError] = useState(null);
+  const wsRef = useRef(null);
+
+  // Load teams once
+  useEffect(() => {
+    getTeams().then(setTeams).catch((e) => setError(e.message));
+  }, []);
+
+  // Open WebSocket and keep session state in sync
+  useEffect(() => {
+    if (!sessionToken) return;
+    const ws = openSessionSocket(sessionToken, (msg) => {
+      if (msg.state) setSession(msg.state);
+    });
+    wsRef.current = ws;
+    return () => ws.close();
+  }, [sessionToken]);
+
+  async function handleStartDraft() {
+    try {
+      await startDraft(sessionToken, adminToken);
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  async function handlePick(teamId) {
+    if (!session || session.current_player_id !== playerId) return;
+    try {
+      await makePick(sessionToken, playerId, teamId);
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  if (!session) return <div className="center-page">Connecting…</div>;
+
+  const teamMap = Object.fromEntries(teams.map((t) => [t.id, t]));
+  const pickedTeamIds = new Set(session.picks.map((p) => p.team_id));
+  const poolTeams = teams.filter((t) => !pickedTeamIds.has(t.id));
+
+  const isMyTurn = session.status === "drafting" && session.current_player_id === playerId;
+  const currentPlayer = session.players.find((p) => p.id === session.current_player_id);
+
+  function picksForPlayer(pid) {
+    return session.picks
+      .filter((p) => p.player_id === pid)
+      .sort((a, b) => a.pick_number - b.pick_number);
+  }
+
+  const totalPicks = 48;
+  const picksMade = session.picks.length;
+
+  return (
+    <div className="draft-board">
+      {/* Header */}
+      <div className="draft-header">
+        <h1>⚽ WC 2026 Draft</h1>
+        <span className={`status-badge status-${session.status}`}>{session.status}</span>
+        {session.status === "drafting" && (
+          <span style={{ fontSize: "0.85rem", color: "#94a3b8" }}>
+            Pick {picksMade + 1} of {totalPicks}
+          </span>
+        )}
+        {adminToken && session.status === "waiting" && (
+          <button
+            className="btn-primary"
+            onClick={handleStartDraft}
+            disabled={session.players.length < 2}
+          >
+            Start Draft ({session.players.length}/4 joined)
+          </button>
+        )}
+      </div>
+
+      {/* Turn banner */}
+      {session.status === "drafting" && currentPlayer && (
+        <div className="turn-banner">
+          {isMyTurn
+            ? "Your turn — click a team to pick"
+            : `Waiting for ${currentPlayer.name} to pick…`}
+        </div>
+      )}
+
+      {session.status === "complete" && (
+        <div className="turn-banner" style={{ background: "#1e3a5f", color: "#93c5fd" }}>
+          Draft complete!
+        </div>
+      )}
+
+      {error && (
+        <div style={{ color: "#f87171", fontSize: "0.85rem" }}>{error}</div>
+      )}
+
+      {/* Waiting lobby */}
+      {session.status === "waiting" && (
+        <div>
+          <p style={{ color: "#94a3b8", marginBottom: 12 }}>
+            Waiting for players to join ({session.players.length}/4)
+          </p>
+          <div className="waiting-players">
+            {session.players.map((p) => (
+              <div key={p.id} className="player-slot filled">
+                {p.name} {p.id === playerId ? "(you)" : ""}
+              </div>
+            ))}
+            {Array.from({ length: 4 - session.players.length }).map((_, i) => (
+              <div key={i} className="player-slot">Waiting for player…</div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Draft columns */}
+      {session.status !== "waiting" && (
+        <div className="columns">
+          {/* Pool */}
+          <div className="column">
+            <div className="column-header">
+              Available ({poolTeams.length})
+            </div>
+            <div className="team-list">
+              {poolTeams.map((team) => (
+                <div
+                  key={team.id}
+                  className={`team-card ${isMyTurn ? "clickable" : ""}`}
+                  onClick={() => isMyTurn && handlePick(team.id)}
+                >
+                  {team.crest_url && (
+                    <img src={team.crest_url} alt="" onError={(e) => (e.target.style.display = "none")} />
+                  )}
+                  <span>{team.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Player columns */}
+          {session.players.map((player) => {
+            const playerPicks = picksForPlayer(player.id);
+            const isActive = session.current_player_id === player.id && session.status === "drafting";
+            const isMe = player.id === playerId;
+            return (
+              <div key={player.id} className={`column ${isActive ? "active-player" : ""}`}>
+                <div className={`column-header ${isActive ? "my-turn" : ""}`}>
+                  {player.name} {isMe ? "(you)" : ""} — {playerPicks.length}
+                </div>
+                <div className="team-list">
+                  {playerPicks.map((pick) => {
+                    const team = teamMap[pick.team_id];
+                    return (
+                      <div key={pick.pick_number} className="team-card">
+                        {team?.crest_url && (
+                          <img src={team.crest_url} alt="" onError={(e) => (e.target.style.display = "none")} />
+                        )}
+                        <span>{team?.name ?? `Team ${pick.team_id}`}</span>
+                        <span className="pick-number">#{pick.pick_number + 1}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Empty player slots if < 4 players */}
+          {Array.from({ length: 4 - session.players.length }).map((_, i) => (
+            <div key={`empty-${i}`} className="column">
+              <div className="column-header">—</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
