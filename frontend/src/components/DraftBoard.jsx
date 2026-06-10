@@ -81,7 +81,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
 
       {/* Turn banner */}
       {session.status === "drafting" && currentPlayer && (
-        <div className="turn-banner">
+        <div className={`turn-banner ${isMyTurn ? "" : "turn-banner-waiting"}`}>
           {isMyTurn
             ? "Your turn — click a team to pick"
             : `Waiting for ${currentPlayer.name} to pick…`}
@@ -146,9 +146,11 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
             const playerPicks = picksForPlayer(player.id);
             const isActive = session.current_player_id === player.id && session.status === "drafting";
             const isMe = player.id === playerId;
+            const colClass = isActive && isMe ? "my-turn-col" : isActive ? "active-player" : "";
+            const headerClass = isActive && isMe ? "my-turn-header" : isActive ? "active-header" : "";
             return (
-              <div key={player.id} className={`column ${isActive ? "active-player" : ""}`}>
-                <div className={`column-header ${isActive ? "my-turn" : ""}`}>
+              <div key={player.id} className={`column ${colClass}`}>
+                <div className={`column-header ${headerClass}`}>
                   {player.name} {isMe ? "(you)" : ""} — {playerPicks.length}
                 </div>
                 <div className="team-list">
