@@ -16,12 +16,15 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     const session = params.get("session");
     const admin = params.get("admin");
+    const playerParam = params.get("player");
+    const nameParam = params.get("pname");
 
     if (session) {
       setSessionToken(session);
       if (admin) setAdminToken(admin);
-      const savedId = localStorage.getItem(`pid_${session}`);
-      const savedName = localStorage.getItem(`pname_${session}`);
+      // URL params take priority (enables cross-device sharing); fall back to localStorage
+      const savedId = playerParam || localStorage.getItem(`pid_${session}`);
+      const savedName = nameParam || localStorage.getItem(`pname_${session}`);
       if (savedId) {
         setPlayerId(parseInt(savedId));
         setPlayerName(savedName);
@@ -39,6 +42,11 @@ export default function App() {
     localStorage.setItem(`pname_${sessionToken}`, name);
     setPlayerId(id);
     setPlayerName(name);
+    // Embed player identity in URL so it can be bookmarked / opened on another device
+    const params = new URLSearchParams(window.location.search);
+    params.set("player", id);
+    params.set("pname", name);
+    window.history.replaceState({}, "", `?${params.toString()}`);
     setPhase("draft");
   }
 
