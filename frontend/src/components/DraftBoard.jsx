@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { getTeams, startDraft, makePick, openSessionSocket } from "../api";
 
 export default function DraftBoard({ sessionToken, adminToken, playerId, playerName }) {
   const [teams, setTeams] = useState([]);
   const [session, setSession] = useState(null);
   const [error, setError] = useState(null);
+  const [secondsLeft, setSecondsLeft] = useState(null);
   const wsRef = useRef(null);
 
   // Load teams once
@@ -21,6 +22,23 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
     wsRef.current = ws;
     return () => ws.close();
   }, [sessionToken]);
+
+  // Client-side countdown — derived from pick_started_at sent by the server
+  useEffect(() => {
+    if (!session?.pick_started_at) {
+      setSecondsLeft(null);
+      return;
+    }
+    const timeout = session.auto_pick_timeout_seconds;
+    function tick() {
+      const elapsed = (Date.now() - new Date(session.pick_started_at).getTime()) / 1000;
+      const left = Math.max(0, Math.ceil(timeout - elapsed));
+      setSecondsLeft(left);
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [session?.pick_started_at, session?.auto_pick_timeout_seconds]);
 
   async function handleStartDraft() {
     try {
@@ -82,9 +100,16 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
       {/* Turn banner */}
       {session.status === "drafting" && currentPlayer && (
         <div className={`turn-banner ${isMyTurn ? "" : "turn-banner-waiting"}`}>
-          {isMyTurn
-            ? "Your turn — click a team to pick"
-            : `Waiting for ${currentPlayer.name} to pick…`}
+          <span>
+            {isMyTurn
+              ? "Your turn — click a team to pick"
+              : `Waiting for ${currentPlayer.name} to pick…`}
+          </span>
+          {secondsLeft !== null && (
+            <span className="auto-pick-timer">
+              ⏱ {secondsLeft}s
+            </span>
+          )}
         </div>
       )}
 

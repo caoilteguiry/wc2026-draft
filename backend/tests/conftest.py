@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 
 from main import app
 from database import Base, get_db
+from models import Team
 
 _TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -26,7 +27,10 @@ def _run(coro):
 
 
 @pytest.fixture()
-def client():
+def db_setup():
+    """Creates the test DB engine and session factory, seeds 48 teams, and yields
+    the session factory so tests can use it directly (e.g. to monkeypatch
+    module-level session factories that bypass FastAPI's dependency injection)."""
     engine = create_async_engine(
         _TEST_DB_URL,
         connect_args={"check_same_thread": False},
@@ -37,8 +41,21 @@ def client():
     async def _setup():
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+        async with session_factory() as session:
+            session.add_all([
+                Team(id=i, name=f"Team {i}", group="A", crest_url=None, external_id=i)
+                for i in range(1, 49)
+            ])
+            await session.commit()
 
     _run(_setup())
+    yield session_factory
+    _run(engine.dispose())
+
+
+@pytest.fixture()
+def client(db_setup):
+    session_factory = db_setup
 
     async def override_get_db():
         async with session_factory() as session:
@@ -50,4 +67,3 @@ def client():
         yield c
 
     app.dependency_overrides.clear()
-    _run(engine.dispose())

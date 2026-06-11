@@ -46,8 +46,10 @@ AUTO_PICK_SECONDS = 900  # 15 minutes
 _timers: dict[str, asyncio.Task] = {}
 
 
-def _schedule_auto_pick(token: str, delay: float = AUTO_PICK_SECONDS):
+def _schedule_auto_pick(token: str, delay: float | None = None):
     """Cancel any existing timer for the session and start a fresh one."""
+    if delay is None:
+        delay = AUTO_PICK_SECONDS
     existing = _timers.pop(token, None)
     if existing and not existing.done():
         existing.cancel()
@@ -125,6 +127,9 @@ def _session_out(session: DraftSession) -> dict:
     current_player_id = get_current_player_id(
         session.draft_order or [], session.current_pick_index
     ) if session.status == "drafting" else None
+    pick_started_at = (
+        session.pick_started_at.isoformat() if session.pick_started_at else None
+    )
     return {
         "token": session.token,
         "status": session.status,
@@ -135,6 +140,8 @@ def _session_out(session: DraftSession) -> dict:
         ],
         "current_pick_index": session.current_pick_index,
         "current_player_id": current_player_id,
+        "pick_started_at": pick_started_at,
+        "auto_pick_timeout_seconds": AUTO_PICK_SECONDS,
     }
 
 
