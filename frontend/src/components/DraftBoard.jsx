@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getTeams, startDraft, makePick, openSessionSocket } from "../api";
+import ResultsTab from "./ResultsTab";
 
 export default function DraftBoard({ sessionToken, adminToken, playerId, playerName }) {
   const [teams, setTeams] = useState([]);
   const [session, setSession] = useState(null);
   const [error, setError] = useState(null);
   const [secondsLeft, setSecondsLeft] = useState(null);
+  const [activeTab, setActiveTab] = useState("draft");
   const wsRef = useRef(null);
 
   // Load teams once
@@ -96,6 +98,26 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
           </button>
         )}
       </div>
+
+      {/* Tab bar */}
+      <div className="tab-bar">
+        {["draft", "results", "leaderboard"].map(tab => (
+          <button
+            key={tab}
+            className={`tab-btn ${activeTab === tab ? "tab-active" : ""}`}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "results" && <ResultsTab adminToken={adminToken} />}
+      {activeTab === "leaderboard" && (
+        <p style={{ color: "#64748b", padding: "16px" }}>Leaderboard coming soon.</p>
+      )}
+
+      {activeTab === "draft" && <>
 
       {/* Turn banner */}
       {session.status === "drafting" && currentPlayer && (
@@ -204,6 +226,8 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
           ))}
         </div>
       )}
+
+      </>}
     </div>
   );
 }

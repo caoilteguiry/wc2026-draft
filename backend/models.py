@@ -3,6 +3,16 @@ from sqlalchemy import Column, Integer, String, ForeignKey, JSON, DateTime, Uniq
 from sqlalchemy.orm import relationship
 from database import Base
 
+STAGE_ORDER = [
+    "GROUP_STAGE",
+    "ROUND_OF_32",
+    "ROUND_OF_16",
+    "QUARTER_FINALS",
+    "SEMI_FINALS",
+    "THIRD_PLACE",
+    "FINAL",
+]
+
 
 class Team(Base):
     __tablename__ = "teams"
@@ -60,3 +70,23 @@ class Pick(Base):
         UniqueConstraint("session_id", "team_id"),
         UniqueConstraint("session_id", "pick_number"),
     )
+
+
+class Match(Base):
+    __tablename__ = "matches"
+
+    id = Column(Integer, primary_key=True)
+    external_id = Column(Integer, unique=True, nullable=False)
+    home_team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
+    away_team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
+    home_score = Column(Integer, nullable=True)
+    away_score = Column(Integer, nullable=True)
+    # HOME_TEAM / AWAY_TEAM / DRAW / null — reflects penalty shootout outcomes
+    winner = Column(String, nullable=True)
+    stage = Column(String, nullable=False)
+    matchday = Column(Integer, nullable=True)
+    status = Column(String, nullable=False)  # SCHEDULED / IN_PLAY / FINISHED / POSTPONED
+    utc_date = Column(DateTime, nullable=False)
+
+    home_team = relationship("Team", foreign_keys=[home_team_id])
+    away_team = relationship("Team", foreign_keys=[away_team_id])

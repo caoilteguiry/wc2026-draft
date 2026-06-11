@@ -51,6 +51,18 @@ export async function getTeams() {
   return res.json();
 }
 
+export async function getResults() {
+  const res = await fetch(`${BASE}/results/`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function syncResults(adminToken) {
+  const res = await fetch(`${BASE}/results/sync?admin_token=${adminToken}`, { method: "POST" });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 export function openSessionSocket(token, onMessage) {
   const ws = new WebSocket(`${WS_BASE}/sessions/${token}/ws`);
   ws.onmessage = (e) => onMessage(JSON.parse(e.data));

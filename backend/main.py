@@ -1,3 +1,4 @@
+import asyncio
 import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -7,6 +8,7 @@ from fastapi.responses import FileResponse
 from database import engine, Base
 from routers import draft, teams
 from routers.draft import reschedule_active_timers
+from routers.results import adaptive_sync_loop
 
 
 @asynccontextmanager
@@ -14,6 +16,7 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     await reschedule_active_timers()
+    asyncio.create_task(adaptive_sync_loop())
     yield
 
 
@@ -29,6 +32,8 @@ app.add_middleware(
 
 app.include_router(teams.router)
 app.include_router(draft.router)
+from routers import results
+app.include_router(results.router)
 
 # Serve built React frontend if the static dir exists
 _static_dir = os.path.join(os.path.dirname(__file__), "static")
