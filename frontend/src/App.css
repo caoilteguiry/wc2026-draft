@@ -119,10 +119,13 @@ body {
 
 .columns {
   display: grid;
-  grid-template-columns: 1.4fr repeat(4, 1fr);
-  gap: 10px;
+  grid-template-columns: minmax(150px, 1.4fr) repeat(4, minmax(120px, 1fr));
+  gap: 8px;
   flex: 1;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* prevent grid blowout on narrow viewports */
+  min-width: 0;
 }
 
 .column {
@@ -142,14 +145,15 @@ body {
 }
 
 .column-header {
-  padding: 10px 12px;
-  font-size: 0.85rem;
+  padding: 10px 8px;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
   background: #0f172a;
   color: #94a3b8;
   border-bottom: 1px solid #334155;
+  word-break: break-word;
 }
 
 .column-header.my-turn-header {
@@ -180,6 +184,14 @@ body {
   background: #0f172a;
   font-size: 0.85rem;
   cursor: default;
+  min-width: 0;
+}
+
+.team-card span:not(.pick-number) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .team-card.clickable {
