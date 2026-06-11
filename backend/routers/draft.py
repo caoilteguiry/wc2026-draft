@@ -128,7 +128,7 @@ def _session_out(session: DraftSession) -> dict:
         session.draft_order or [], session.current_pick_index
     ) if session.status == "drafting" else None
     pick_started_at = (
-        session.pick_started_at.isoformat() if session.pick_started_at else None
+        session.pick_started_at.isoformat() + "Z" if session.pick_started_at else None
     )
     return {
         "token": session.token,
