@@ -31,16 +31,16 @@ function formatDate(utcString) {
 }
 
 function StatusBadge({ status }) {
-  const styles = {
-    FINISHED:   { background: "#1e293b", color: "#64748b" },
-    IN_PLAY:    { background: "#166534", color: "#86efac" },
-    SCHEDULED:  { background: "#1e3a5f", color: "#93c5fd" },
-    POSTPONED:  { background: "#451a03", color: "#fcd34d" },
+  const badges = {
+    FINISHED:  { background: "#1e293b", color: "#64748b",  label: "FT"         },
+    IN_PLAY:   { background: "#166534", color: "#86efac",  label: "LIVE"       },
+    POSTPONED: { background: "#451a03", color: "#fcd34d",  label: "POSTPONED"  },
   };
-  const s = styles[status] || styles.SCHEDULED;
+  const badge = badges[status];
+  if (!badge) return null;  // SCHEDULED / TIMED — time shown instead
   return (
-    <span style={{ ...s, padding: "2px 8px", borderRadius: 12, fontSize: "0.7rem", fontWeight: 700 }}>
-      {status === "IN_PLAY" ? "LIVE" : status}
+    <span style={{ ...badge, padding: "2px 8px", borderRadius: 12, fontSize: "0.7rem", fontWeight: 700 }}>
+      {badge.label}
     </span>
   );
 }
