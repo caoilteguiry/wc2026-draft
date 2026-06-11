@@ -130,6 +130,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0; /* allow grid cell to shrink below text min-content */
 }
 
 .match-team img {
