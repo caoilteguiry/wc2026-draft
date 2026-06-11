@@ -45,18 +45,31 @@ function StatusBadge({ status }) {
   );
 }
 
-function MatchRow({ match }) {
-  const home = match.home_team;
-  const away = match.away_team;
+function TeamCell({ team, playerName, align }) {
+  return (
+    <div className={`match-team match-team-${align}`}>
+      {team?.crest_url && (
+        <img src={team.crest_url} alt="" onError={e => (e.target.style.display = "none")} />
+      )}
+      <div className="match-team-info">
+        <span>{team?.name ?? "TBD"}</span>
+        {playerName && <span className="match-player">({playerName})</span>}
+      </div>
+    </div>
+  );
+}
+
+function MatchRow({ match, teamPlayerMap }) {
   const finished = match.status === "FINISHED";
   const live = match.status === "IN_PLAY";
 
   return (
     <div className="match-row">
-      <div className="match-team match-team-home">
-        {home?.crest_url && <img src={home.crest_url} alt="" onError={e => e.target.style.display = "none"} />}
-        <span>{home?.name ?? "TBD"}</span>
-      </div>
+      <TeamCell
+        team={match.home_team}
+        playerName={teamPlayerMap[match.home_team?.id]}
+        align="home"
+      />
 
       <div className="match-score">
         {finished || live
@@ -66,15 +79,24 @@ function MatchRow({ match }) {
         <StatusBadge status={match.status} />
       </div>
 
-      <div className="match-team match-team-away">
-        {away?.crest_url && <img src={away.crest_url} alt="" onError={e => e.target.style.display = "none"} />}
-        <span>{away?.name ?? "TBD"}</span>
-      </div>
+      <TeamCell
+        team={match.away_team}
+        playerName={teamPlayerMap[match.away_team?.id]}
+        align="away"
+      />
     </div>
   );
 }
 
-export default function ResultsTab({ adminToken }) {
+export default function ResultsTab({ adminToken, session }) {
+  // Map team_id → player name from the session's picks
+  const teamPlayerMap = {};
+  if (session) {
+    const playerById = Object.fromEntries(session.players.map(p => [p.id, p.name]));
+    for (const pick of session.picks) {
+      teamPlayerMap[pick.team_id] = playerById[pick.player_id];
+    }
+  }
   const [matches, setMatches] = useState([]);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState(null);
@@ -127,7 +149,7 @@ export default function ResultsTab({ adminToken }) {
       {grouped.map(({ stage, matches: ms }) => (
         <div key={stage} className="stage-group">
           <div className="stage-header">{STAGE_LABELS[stage] ?? stage}</div>
-          {ms.map(m => <MatchRow key={m.id} match={m} />)}
+          {ms.map(m => <MatchRow key={m.id} match={m} teamPlayerMap={teamPlayerMap} />)}
         </div>
       ))}
     </div>

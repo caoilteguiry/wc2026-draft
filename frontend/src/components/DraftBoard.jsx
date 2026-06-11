@@ -112,7 +112,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
         ))}
       </div>
 
-      {activeTab === "results" && <ResultsTab adminToken={adminToken} />}
+      {activeTab === "results" && <ResultsTab adminToken={adminToken} session={session} />}
       {activeTab === "leaderboard" && (
         <p style={{ color: "#64748b", padding: "16px" }}>Leaderboard coming soon.</p>
       )}
