@@ -378,6 +378,7 @@ body {
   background: #1e293b;
   border-radius: 8px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .lb-player-header {
