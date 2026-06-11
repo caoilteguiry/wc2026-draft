@@ -20,12 +20,20 @@ Points are awarded for each knockout round win.
 | Round of 16     | 8      |
 | Quarter-final   | 11     |
 | Semi-final      | 14     |
-| 3rd Place Match | 14     |
 | Final (Champion)| 20     |
+
+## 3rd Place Play-off
+
+Both teams are penalised for being in the consolation match.
+
+| Outcome | Points |
+|---------|--------|
+| Winner  | -5     |
+| Loser   | -10    |
 
 ## Notes
 
 - Points accumulate across all 12 of a player's drafted teams.
 - Penalty shootout wins count as wins.
 - A team that is eliminated stops contributing points.
-- Each game has a defined score outcome — there are no bonus points or multipliers beyond the above.
+- The 3rd place play-off is the only match where the losing team also receives a (negative) score.
