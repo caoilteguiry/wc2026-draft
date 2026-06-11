@@ -63,6 +63,12 @@ export async function syncResults(adminToken) {
   return res.json();
 }
 
+export async function getLeaderboard(token) {
+  const res = await fetch(`${BASE}/sessions/${token}/leaderboard`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 export function openSessionSocket(token, onMessage) {
   const ws = new WebSocket(`${WS_BASE}/sessions/${token}/ws`);
   ws.onmessage = (e) => onMessage(JSON.parse(e.data));

@@ -363,3 +363,95 @@ body {
   border-color: #3b82f6;
   color: #e2e8f0;
 }
+
+/* Leaderboard tab */
+.leaderboard-tab {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lb-player {
+  background: #1e293b;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.lb-player-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #0f172a;
+  border-bottom: 1px solid #334155;
+}
+
+.lb-rank {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+  min-width: 28px;
+}
+
+.lb-name {
+  font-weight: 700;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.lb-total {
+  font-weight: 700;
+  color: #93c5fd;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.lb-teams {
+  padding: 4px 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lb-team-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 4px;
+  font-size: 0.82rem;
+}
+
+.lb-team-row img {
+  width: 20px;
+  height: 15px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.lb-team-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.lb-team-played {
+  color: #64748b;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.lb-team-pts {
+  font-weight: 600;
+  font-size: 0.82rem;
+  min-width: 36px;
+  text-align: right;
+  white-space: nowrap;
+}

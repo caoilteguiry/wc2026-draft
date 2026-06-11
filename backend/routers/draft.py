@@ -1,4 +1,5 @@
 import asyncio
+import functools
 import random
 import secrets
 from datetime import datetime
@@ -7,9 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from database import get_db, AsyncSessionLocal
-from models import DraftSession, Player, Pick, Team
+from models import DraftSession, Player, Pick, Team, Match
 from schemas import SessionOut, CreateSessionResponse, JoinRequest, PickOut, PickRequest
 from draft_logic import get_current_player_id, TOTAL_PICKS
+from scoring import score_match_for_team
 
 router = APIRouter(prefix="/sessions", tags=["draft"])
 
@@ -283,3 +285,91 @@ async def websocket_endpoint(token: str, ws: WebSocket, db: AsyncSession = Depen
             await ws.receive_text()  # keep alive; client sends pings
     except WebSocketDisconnect:
         manager.disconnect(token, ws)
+
+
+@router.get("/{token}/leaderboard")
+async def get_leaderboard(token: str, db: AsyncSession = Depends(get_db)):
+    session = await _load_session(token, db)
+
+    # Load all finished matches
+    matches_result = await db.execute(select(Match).where(Match.status == "FINISHED"))
+    finished_matches = matches_result.scalars().all()
+
+    # Build player → set of team_ids from picks
+    player_teams: dict[int, set[int]] = {p.id: set() for p in session.players}
+    for pick in session.picks:
+        if pick.player_id in player_teams:
+            player_teams[pick.player_id].add(pick.team_id)
+
+    # Load team details for all drafted teams
+    all_team_ids = list({tid for tids in player_teams.values() for tid in tids})
+    if all_team_ids:
+        teams_result = await db.execute(select(Team).where(Team.id.in_(all_team_ids)))
+        teams = {t.id: t for t in teams_result.scalars().all()}
+    else:
+        teams = {}
+
+    # Calculate scores per player per team
+    player_entries = []
+    for player in session.players:
+        team_scores = []
+        for team_id in player_teams[player.id]:
+            team = teams.get(team_id)
+            pts = 0
+            played = 0
+            for match in finished_matches:
+                if match.home_team_id == team_id or match.away_team_id == team_id:
+                    pts += score_match_for_team(match, team_id)
+                    played += 1
+            team_scores.append({
+                "team_id": team_id,
+                "team_name": team.name if team else str(team_id),
+                "crest_url": team.crest_url if team else None,
+                "points": pts,
+                "matches_played": played,
+            })
+        team_scores.sort(key=lambda x: x["points"], reverse=True)
+        total = sum(ts["points"] for ts in team_scores)
+        player_entries.append({
+            "player_id": player.id,
+            "player_name": player.name,
+            "total": total,
+            "teams": team_scores,
+            "_team_ids": player_teams[player.id],
+        })
+
+    # Sort: descending total → head-to-head → alphabetical
+    def compare(a, b):
+        if a["total"] != b["total"]:
+            return b["total"] - a["total"]
+        # Head-to-head: count wins in matches where a team from a faced a team from b
+        h2h = 0
+        for match in finished_matches:
+            a_home = match.home_team_id in a["_team_ids"]
+            a_away = match.away_team_id in a["_team_ids"]
+            b_home = match.home_team_id in b["_team_ids"]
+            b_away = match.away_team_id in b["_team_ids"]
+            if (a_home and b_away) or (a_away and b_home):
+                a_won = (a_home and match.winner == "HOME_TEAM") or (a_away and match.winner == "AWAY_TEAM")
+                b_won = (b_home and match.winner == "HOME_TEAM") or (b_away and match.winner == "AWAY_TEAM")
+                if a_won:
+                    h2h += 1
+                elif b_won:
+                    h2h -= 1
+        if h2h != 0:
+            return -h2h  # negative → a ranks higher when a won more h2h
+        # Alphabetical ascending
+        return (a["player_name"] > b["player_name"]) - (a["player_name"] < b["player_name"])
+
+    player_entries.sort(key=functools.cmp_to_key(compare))
+
+    return [
+        {
+            "rank": i + 1,
+            "player_id": e["player_id"],
+            "player_name": e["player_name"],
+            "total": e["total"],
+            "teams": e["teams"],
+        }
+        for i, e in enumerate(player_entries)
+    ]

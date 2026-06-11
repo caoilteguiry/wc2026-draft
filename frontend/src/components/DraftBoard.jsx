@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getTeams, startDraft, makePick, openSessionSocket } from "../api";
 import ResultsTab from "./ResultsTab";
+import LeaderboardTab from "./LeaderboardTab";
 
 export default function DraftBoard({ sessionToken, adminToken, playerId, playerName }) {
   const [teams, setTeams] = useState([]);
@@ -113,9 +114,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
       </div>
 
       {activeTab === "results" && <ResultsTab adminToken={adminToken} session={session} />}
-      {activeTab === "leaderboard" && (
-        <p style={{ color: "#64748b", padding: "16px" }}>Leaderboard coming soon.</p>
-      )}
+      {activeTab === "leaderboard" && <LeaderboardTab sessionToken={sessionToken} />}
 
       {activeTab === "draft" && <>
 
