@@ -142,9 +142,6 @@ body {
 .match-team-home { justify-content: flex-end; text-align: right; }
 .match-team-away { justify-content: flex-start; }
 
-.match-team-home img { order: 1; }
-.match-team-home .match-team-info { order: 0; }
-
 .match-team-info {
   display: flex;
   flex-direction: column;
