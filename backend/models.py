@@ -23,6 +23,7 @@ class DraftSession(Base):
     status = Column(String, default="waiting")  # waiting | drafting | complete
     draft_order = Column(JSON)  # ordered list of player ids for snake draft
     current_pick_index = Column(Integer, default=0)
+    pick_started_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     players = relationship("Player", back_populates="session")

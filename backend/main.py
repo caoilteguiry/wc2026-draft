@@ -6,12 +6,14 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from database import engine, Base
 from routers import draft, teams
+from routers.draft import reschedule_active_timers
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    await reschedule_active_timers()
     yield
 
 

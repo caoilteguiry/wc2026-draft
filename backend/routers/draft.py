@@ -1,10 +1,12 @@
+import asyncio
 import random
 import secrets
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from database import get_db
+from database import get_db, AsyncSessionLocal
 from models import DraftSession, Player, Pick, Team
 from schemas import SessionOut, CreateSessionResponse, JoinRequest, PickOut, PickRequest
 from draft_logic import get_current_player_id, TOTAL_PICKS
@@ -39,6 +41,82 @@ class ConnectionManager:
 
 
 manager = ConnectionManager()
+
+AUTO_PICK_SECONDS = 900  # 15 minutes
+_timers: dict[str, asyncio.Task] = {}
+
+
+def _schedule_auto_pick(token: str, delay: float = AUTO_PICK_SECONDS):
+    """Cancel any existing timer for the session and start a fresh one."""
+    existing = _timers.pop(token, None)
+    if existing and not existing.done():
+        existing.cancel()
+    _timers[token] = asyncio.create_task(_auto_pick(token, delay))
+
+
+async def _auto_pick(token: str, delay: float):
+    """Sleep then make a random pick on behalf of the current player."""
+    try:
+        await asyncio.sleep(delay)
+    except asyncio.CancelledError:
+        return
+
+    async with AsyncSessionLocal() as db:
+        try:
+            session = await _load_session(token, db)
+        except HTTPException:
+            return
+        if session.status != "drafting":
+            return
+
+        picked_ids = {pk.team_id for pk in session.picks}
+        result = await db.execute(select(Team))
+        available = [t for t in result.scalars().all() if t.id not in picked_ids]
+        if not available:
+            return
+
+        player_id = get_current_player_id(session.draft_order, session.current_pick_index)
+        if player_id is None:
+            return
+
+        team = random.choice(available)
+        db.add(Pick(
+            session_id=session.id,
+            player_id=player_id,
+            team_id=team.id,
+            pick_number=session.current_pick_index,
+        ))
+        session.current_pick_index += 1
+        if session.current_pick_index >= TOTAL_PICKS:
+            session.status = "complete"
+            session.pick_started_at = None
+        else:
+            session.pick_started_at = datetime.utcnow()
+        await db.commit()
+        db.expire_all()
+        session = await _load_session(token, db)
+        event = "draft_complete" if session.status == "complete" else "pick_made"
+        await manager.broadcast(token, {"event": event, "state": _session_out(session)})
+
+        if session.status == "drafting":
+            _schedule_auto_pick(token, AUTO_PICK_SECONDS)
+        else:
+            _timers.pop(token, None)
+
+
+async def reschedule_active_timers():
+    """Called on startup — restores timers for any draft that was mid-pick when the server last stopped."""
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(DraftSession).where(
+                DraftSession.status == "drafting",
+                DraftSession.pick_started_at.isnot(None),
+            )
+        )
+        for session in result.scalars().all():
+            elapsed = (datetime.utcnow() - session.pick_started_at).total_seconds()
+            delay = max(AUTO_PICK_SECONDS - elapsed, 10)
+            _schedule_auto_pick(session.token, delay)
 
 
 # --- Helpers ---
@@ -133,10 +211,12 @@ async def start_draft(
     session.draft_order = order
     session.status = "drafting"
     session.current_pick_index = 0
+    session.pick_started_at = datetime.utcnow()
     await db.commit()
     db.expire_all()
     session = await _load_session(token, db)
     await manager.broadcast(token, {"event": "draft_started", "state": _session_out(session)})
+    _schedule_auto_pick(token)
     return _session_out(session)
 
 
@@ -170,11 +250,18 @@ async def make_pick(token: str, body: PickRequest, db: AsyncSession = Depends(ge
     session.current_pick_index += 1
     if session.current_pick_index >= TOTAL_PICKS:
         session.status = "complete"
+        session.pick_started_at = None
+    else:
+        session.pick_started_at = datetime.utcnow()
     await db.commit()
     db.expire_all()
     session = await _load_session(token, db)
     event = "draft_complete" if session.status == "complete" else "pick_made"
     await manager.broadcast(token, {"event": event, "state": _session_out(session)})
+    if session.status == "drafting":
+        _schedule_auto_pick(token)
+    else:
+        _timers.pop(token, None)
     return _session_out(session)
 
 
