@@ -165,8 +165,12 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
 
       {/* Draft columns */}
       {session.status !== "waiting" && (
-        <div className="columns">
-          {/* Pool */}
+        <div
+          className="columns"
+          style={session.status === "complete" ? { gridTemplateColumns: "repeat(4, minmax(120px, 1fr))" } : undefined}
+        >
+          {/* Pool — hidden once draft is complete */}
+          {session.status !== "complete" && (
           <div className="column">
             <div className="column-header">
               Available ({poolTeams.length})
@@ -186,6 +190,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
               ))}
             </div>
           </div>
+          )}
 
           {/* Player columns */}
           {session.players.map((player) => {
