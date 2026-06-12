@@ -26,6 +26,13 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
     return () => ws.close();
   }, [sessionToken]);
 
+  // Close WebSocket once draft is complete — no further events will be broadcast
+  useEffect(() => {
+    if (session?.status === "complete" && wsRef.current) {
+      wsRef.current.close();
+    }
+  }, [session?.status]);
+
   // Client-side countdown — derived from pick_started_at sent by the server
   useEffect(() => {
     if (!session?.pick_started_at) {
