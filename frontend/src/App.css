@@ -403,6 +403,21 @@ body {
   border-bottom: 1px solid #1d2d44;
 }
 
+.lb-player-header-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.lb-player-header-toggle:hover {
+  background: #111827;
+}
+
+.lb-chevron {
+  color: #4e6580;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
 .lb-rank {
   font-size: 0.85rem;
   font-weight: 700;
