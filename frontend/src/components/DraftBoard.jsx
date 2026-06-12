@@ -83,9 +83,6 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
       {/* Header */}
       <div className="draft-header">
         <h1>⚽ WC 2026 Draft</h1>
-        {session.status !== "complete" && (
-          <span className={`status-badge status-${session.status}`}>{session.status}</span>
-        )}
         {session.status === "drafting" && (
           <span style={{ fontSize: "0.85rem", color: "#94a3b8" }}>
             Pick {picksMade + 1} of {totalPicks}
