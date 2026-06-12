@@ -136,7 +136,7 @@ export default function ResultsTab({ adminToken, session }) {
             {syncing ? "Syncing…" : "Sync Results"}
           </button>
         )}
-        {lastSynced && <span style={{ color: "#64748b", fontSize: "0.8rem" }}>Last synced {lastSynced}</span>}
+        {lastSynced && <span style={{ color: "#4e6580", fontSize: "0.8rem" }}>Last synced {lastSynced}</span>}
         {error && <span style={{ color: "#f87171", fontSize: "0.8rem" }}>{error}</span>}
       </div>
 

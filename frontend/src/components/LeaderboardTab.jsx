@@ -5,6 +5,12 @@ function pts(n) {
   return n > 0 ? `+${n}` : String(n);
 }
 
+const RANK_COLOURS = {
+  1: "#f5a623", // gold
+  2: "#a8b8cc", // silver
+  3: "#cd7c4a", // bronze
+};
+
 export default function LeaderboardTab({ sessionToken }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -30,7 +36,9 @@ export default function LeaderboardTab({ sessionToken }) {
       {data.map((entry) => (
         <div key={entry.player_id} className="lb-player">
           <div className="lb-player-header">
-            <span className="lb-rank">#{entry.rank}</span>
+            <span className="lb-rank" style={{ color: RANK_COLOURS[entry.rank] ?? "#4e6580" }}>
+              #{entry.rank}
+            </span>
             <span className="lb-name">{entry.player_name}</span>
             <span className="lb-total">{entry.total} pts</span>
           </div>

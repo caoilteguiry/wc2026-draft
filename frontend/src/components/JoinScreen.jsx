@@ -34,15 +34,15 @@ export default function JoinScreen({ sessionToken, adminToken, inviteUrl, onJoin
 
       {inviteUrl && (
         <div style={{
-          background: "#1e293b",
-          border: "1px solid #334155",
+          background: "#131c2e",
+          border: "1px solid #1d2d44",
           borderRadius: 10,
           padding: "16px 20px",
           width: "100%",
           maxWidth: 480,
           textAlign: "left",
         }}>
-          <p style={{ fontSize: "0.85rem", color: "#94a3b8", marginBottom: 8 }}>
+          <p style={{ fontSize: "0.85rem", color: "#8ba0bb", marginBottom: 8 }}>
             Share this invite link with the other 3 players:
           </p>
           <div style={{ display: "flex", gap: 8 }}>
@@ -53,10 +53,10 @@ export default function JoinScreen({ sessionToken, adminToken, inviteUrl, onJoin
                 flex: 1,
                 padding: "8px 10px",
                 fontSize: "0.85rem",
-                background: "#0f172a",
-                border: "1px solid #334155",
+                background: "#0b0f1a",
+                border: "1px solid #1d2d44",
                 borderRadius: 6,
-                color: "#e2e8f0",
+                color: "#e8edf5",
               }}
               onFocus={(e) => e.target.select()}
             />
@@ -79,10 +79,10 @@ export default function JoinScreen({ sessionToken, adminToken, inviteUrl, onJoin
           style={{
             padding: "8px 12px",
             fontSize: 16,
-            background: "#1e293b",
-            border: "1px solid #334155",
+            background: "#131c2e",
+            border: "1px solid #1d2d44",
             borderRadius: 6,
-            color: "#e2e8f0",
+            color: "#e8edf5",
           }}
         />
         {error && <p style={{ color: "#f87171", margin: 0, fontSize: "0.85rem" }}>{error}</p>}

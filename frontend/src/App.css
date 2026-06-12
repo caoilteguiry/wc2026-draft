@@ -6,8 +6,8 @@
 
 body {
   font-family: system-ui, sans-serif;
-  background: #0f172a;
-  color: #e2e8f0;
+  background: #0b0f1a;
+  color: #e8edf5;
   min-height: 100vh;
 }
 
@@ -23,33 +23,37 @@ body {
 }
 
 .center-page h1 {
-  font-size: 2.2rem;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #e8edf5;
 }
 
 .btn-primary {
-  background: #3b82f6;
-  color: white;
+  background: #f5a623;
+  color: #0b0f1a;
   border: none;
   padding: 12px 28px;
   font-size: 1rem;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .btn-primary:hover {
-  background: #2563eb;
+  background: #e09510;
 }
 
 .btn-primary:disabled {
-  background: #475569;
+  background: #3a4a5c;
+  color: #6b7f95;
   cursor: not-allowed;
 }
 
 .btn-secondary {
-  background: #1e293b;
-  color: #94a3b8;
-  border: 1px solid #334155;
+  background: #131c2e;
+  color: #8ba0bb;
+  border: 1px solid #1d2d44;
   padding: 8px 18px;
   font-size: 0.9rem;
   border-radius: 6px;
@@ -57,21 +61,22 @@ body {
 }
 
 .btn-secondary:hover {
-  background: #334155;
+  background: #1a2540;
+  color: #e8edf5;
 }
 
 /* Tab bar */
 .tab-bar {
   display: flex;
   gap: 4px;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid #1d2d44;
   padding-bottom: 0;
 }
 
 .tab-btn {
   background: none;
   border: none;
-  color: #64748b;
+  color: #4e6580;
   font-size: 0.9rem;
   font-weight: 600;
   padding: 8px 18px;
@@ -80,11 +85,11 @@ body {
   margin-bottom: -1px;
 }
 
-.tab-btn:hover { color: #e2e8f0; }
+.tab-btn:hover { color: #e8edf5; }
 
 .tab-btn.tab-active {
-  color: #e2e8f0;
-  border-bottom-color: #3b82f6;
+  color: #f5a623;
+  border-bottom-color: #f5a623;
 }
 
 /* Results tab */
@@ -110,9 +115,9 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #64748b;
+  color: #4e6580;
   padding: 6px 0 4px;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid #131c2e;
   margin-bottom: 4px;
 }
 
@@ -122,7 +127,7 @@ body {
   align-items: center;
   gap: 8px;
   padding: 7px 4px;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid #131c2e;
   font-size: 0.85rem;
 }
 
@@ -130,7 +135,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  min-width: 0; /* allow grid cell to shrink below text min-content */
+  min-width: 0;
 }
 
 .match-team img {
@@ -169,7 +174,7 @@ body {
 
 .match-player {
   font-size: 0.72rem;
-  color: #64748b;
+  color: #4e6580;
   font-weight: 400;
 }
 
@@ -184,7 +189,7 @@ body {
 }
 
 .score-live { color: #86efac; }
-.score-time { font-size: 0.75rem; font-weight: 400; color: #94a3b8; white-space: nowrap; }
+.score-time { font-size: 0.75rem; font-weight: 400; color: #8ba0bb; white-space: nowrap; }
 
 /* Draft board layout */
 .draft-board {
@@ -204,7 +209,10 @@ body {
 }
 
 .draft-header h1 {
-  font-size: 1.3rem;
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #e8edf5;
 }
 
 .status-badge {
@@ -215,12 +223,12 @@ body {
   text-transform: uppercase;
 }
 
-.status-waiting { background: #334155; color: #94a3b8; }
+.status-waiting  { background: #1a2540; color: #8ba0bb; }
 .status-drafting { background: #166534; color: #86efac; }
-.status-complete { background: #1e3a5f; color: #93c5fd; }
+.status-complete { background: #2a1f05; color: #f5a623; }
 
 .turn-banner {
-  background: #14532d;
+  background: #0d3320;
   color: #86efac;
   padding: 8px 16px;
   border-radius: 8px;
@@ -239,8 +247,13 @@ body {
 }
 
 .turn-banner.turn-banner-waiting {
-  background: #451a03;
-  color: #fcd34d;
+  background: #2d1200;
+  color: #fbbf24;
+}
+
+.turn-banner.turn-banner-complete {
+  background: #1a2540;
+  color: #f5a623;
 }
 
 .columns {
@@ -250,12 +263,11 @@ body {
   flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
-  /* prevent grid blowout on narrow viewports */
   min-width: 0;
 }
 
 .column {
-  background: #1e293b;
+  background: #131c2e;
   border-radius: 10px;
   overflow: hidden;
   display: flex;
@@ -276,20 +288,20 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  background: #0f172a;
-  color: #94a3b8;
-  border-bottom: 1px solid #334155;
+  background: #0b0f1a;
+  color: #8ba0bb;
+  border-bottom: 1px solid #1d2d44;
   word-break: break-word;
 }
 
 .column-header.my-turn-header {
-  background: #14532d;
+  background: #0d3320;
   color: #86efac;
 }
 
 .column-header.active-header {
-  background: #451a03;
-  color: #fcd34d;
+  background: #2d1200;
+  color: #fbbf24;
 }
 
 .team-list {
@@ -307,7 +319,7 @@ body {
   gap: 8px;
   padding: 7px 10px;
   border-radius: 6px;
-  background: #0f172a;
+  background: #0b0f1a;
   font-size: 0.85rem;
   cursor: default;
   min-width: 0;
@@ -322,12 +334,12 @@ body {
 
 .team-card.clickable {
   cursor: pointer;
-  border: 1px solid #334155;
+  border: 1px solid #1d2d44;
 }
 
 .team-card.clickable:hover {
-  background: #1e3a5f;
-  border-color: #3b82f6;
+  background: #1a2540;
+  border-color: #f5a623;
 }
 
 .team-card img {
@@ -339,7 +351,7 @@ body {
 
 .pick-number {
   font-size: 0.7rem;
-  color: #64748b;
+  color: #3a4e63;
   margin-left: auto;
 }
 
@@ -353,15 +365,16 @@ body {
 .player-slot {
   padding: 12px;
   border-radius: 8px;
-  background: #0f172a;
-  border: 1px dashed #334155;
-  color: #64748b;
+  background: #0b0f1a;
+  border: 1px dashed #1d2d44;
+  color: #4e6580;
   font-size: 0.9rem;
 }
 
 .player-slot.filled {
-  border-color: #3b82f6;
-  color: #e2e8f0;
+  border-color: #f5a623;
+  border-style: solid;
+  color: #e8edf5;
 }
 
 /* Leaderboard tab */
@@ -375,7 +388,7 @@ body {
 }
 
 .lb-player {
-  background: #1e293b;
+  background: #131c2e;
   border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
@@ -386,14 +399,13 @@ body {
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  background: #0f172a;
-  border-bottom: 1px solid #334155;
+  background: #0b0f1a;
+  border-bottom: 1px solid #1d2d44;
 }
 
 .lb-rank {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #64748b;
   min-width: 28px;
 }
 
@@ -408,7 +420,7 @@ body {
 
 .lb-total {
   font-weight: 700;
-  color: #93c5fd;
+  color: #f5a623;
   font-size: 1rem;
   white-space: nowrap;
 }
@@ -444,7 +456,7 @@ body {
 }
 
 .lb-team-played {
-  color: #64748b;
+  color: #4e6580;
   font-size: 0.75rem;
   white-space: nowrap;
 }

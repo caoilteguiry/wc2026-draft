@@ -84,7 +84,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
       <div className="draft-header">
         <h1>⚽ WC 2026 Draft</h1>
         {session.status === "drafting" && (
-          <span style={{ fontSize: "0.85rem", color: "#94a3b8" }}>
+          <span style={{ fontSize: "0.85rem", color: "#8ba0bb" }}>
             Pick {picksMade + 1} of {totalPicks}
           </span>
         )}
@@ -134,7 +134,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
       )}
 
       {session.status === "complete" && (
-        <div className="turn-banner" style={{ background: "#1e3a5f", color: "#93c5fd" }}>
+        <div className="turn-banner turn-banner-complete">
           Draft complete!
         </div>
       )}
@@ -146,7 +146,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
       {/* Waiting lobby */}
       {session.status === "waiting" && (
         <div>
-          <p style={{ color: "#94a3b8", marginBottom: 12 }}>
+          <p style={{ color: "#8ba0bb", marginBottom: 12 }}>
             Waiting for players to join ({session.players.length}/4)
           </p>
           <div className="waiting-players">
