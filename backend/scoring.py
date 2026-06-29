@@ -2,7 +2,7 @@
 Pure scoring logic — no DB dependencies, fully unit-testable.
 
 match argument must expose:
-  .stage         — e.g. "GROUP_STAGE", "ROUND_OF_32", ...
+  .stage         — e.g. "GROUP_STAGE", "LAST_32", ...
   .status        — e.g. "FINISHED", "IN_PLAY", ...
   .winner        — "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | None
   .home_team_id  — int
@@ -10,8 +10,8 @@ match argument must expose:
 """
 
 _KNOCKOUT_POINTS: dict[str, int] = {
-    "ROUND_OF_32": 5,
-    "ROUND_OF_16": 8,
+    "LAST_32": 5,
+    "LAST_16": 8,
     "QUARTER_FINALS": 11,
     "SEMI_FINALS": 14,
     "FINAL": 20,

@@ -49,11 +49,11 @@ def test_group_stage_draw_away():
 # ---------------------------------------------------------------------------
 
 def test_round_of_32_win():
-    assert score_match_for_team(make_match("ROUND_OF_32", winner="HOME_TEAM"), 1) == 5
+    assert score_match_for_team(make_match("LAST_32", winner="HOME_TEAM"), 1) == 5
 
 
 def test_round_of_16_win():
-    assert score_match_for_team(make_match("ROUND_OF_16", winner="HOME_TEAM"), 1) == 8
+    assert score_match_for_team(make_match("LAST_16", winner="HOME_TEAM"), 1) == 8
 
 
 def test_quarter_finals_win():
@@ -72,7 +72,7 @@ def test_final_win():
 # Knockout rounds — losses = 0
 # ---------------------------------------------------------------------------
 
-@pytest.mark.parametrize("stage", ["ROUND_OF_32", "ROUND_OF_16", "QUARTER_FINALS", "SEMI_FINALS", "FINAL"])
+@pytest.mark.parametrize("stage", ["LAST_32", "LAST_16", "QUARTER_FINALS", "SEMI_FINALS", "FINAL"])
 def test_knockout_loss_returns_zero(stage):
     assert score_match_for_team(make_match(stage, winner="AWAY_TEAM"), 1) == 0
 

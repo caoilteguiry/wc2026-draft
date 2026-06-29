@@ -3,8 +3,8 @@ import { getResults, syncResults } from "../api";
 
 const STAGE_ORDER = [
   "GROUP_STAGE",
-  "ROUND_OF_32",
-  "ROUND_OF_16",
+  "LAST_32",
+  "LAST_16",
   "QUARTER_FINALS",
   "SEMI_FINALS",
   "THIRD_PLACE",
@@ -13,8 +13,8 @@ const STAGE_ORDER = [
 
 const STAGE_LABELS = {
   GROUP_STAGE: "Group Stage",
-  ROUND_OF_32: "Round of 32",
-  ROUND_OF_16: "Round of 16",
+  LAST_32: "Round of 32",
+  LAST_16: "Round of 16",
   QUARTER_FINALS: "Quarter-finals",
   SEMI_FINALS: "Semi-finals",
   THIRD_PLACE: "3rd Place",

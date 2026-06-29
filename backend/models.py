@@ -5,8 +5,8 @@ from database import Base
 
 STAGE_ORDER = [
     "GROUP_STAGE",
-    "ROUND_OF_32",
-    "ROUND_OF_16",
+    "LAST_32",
+    "LAST_16",
     "QUARTER_FINALS",
     "SEMI_FINALS",
     "THIRD_PLACE",
