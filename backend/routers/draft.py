@@ -11,7 +11,7 @@ from database import get_db, AsyncSessionLocal
 from models import DraftSession, Player, Pick, Team, Match
 from schemas import SessionOut, CreateSessionResponse, JoinRequest, PickOut, PickRequest
 from draft_logic import get_current_player_id, TOTAL_PICKS
-from scoring import score_match_for_team
+from scoring import score_match_for_team, breakdown_match_for_team
 
 router = APIRouter(prefix="/sessions", tags=["draft"])
 
@@ -317,16 +317,21 @@ async def get_leaderboard(token: str, db: AsyncSession = Depends(get_db)):
             team = teams.get(team_id)
             pts = 0
             played = 0
+            totals = {k: 0 for k in ("gw", "gd", "gl", "last32w", "last16w", "qfw", "sfw", "third", "fourth", "fw")}
             for match in finished_matches:
                 if match.home_team_id == team_id or match.away_team_id == team_id:
                     pts += score_match_for_team(match, team_id)
                     played += 1
+                    bd = breakdown_match_for_team(match, team_id)
+                    for k in totals:
+                        totals[k] += bd[k]
             team_scores.append({
                 "team_id": team_id,
                 "team_name": team.name if team else str(team_id),
                 "crest_url": team.crest_url if team else None,
                 "points": pts,
                 "matches_played": played,
+                "breakdown": totals,
             })
         team_scores.sort(key=lambda x: x["points"], reverse=True)
         total = sum(ts["points"] for ts in team_scores)
