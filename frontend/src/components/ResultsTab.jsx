@@ -88,7 +88,7 @@ function MatchRow({ match, teamPlayerMap }) {
   );
 }
 
-export default function ResultsTab({ adminToken, session }) {
+export default function ResultsTab({ adminToken, session, mode = "results" }) {
   // Map team_id → player name from the session's picks
   const teamPlayerMap = {};
   if (session) {
@@ -121,9 +121,13 @@ export default function ResultsTab({ adminToken, session }) {
     }
   }
 
+  const visibleMatches = mode === "results"
+    ? matches.filter(m => m.status === "FINISHED")
+    : matches.filter(m => m.status !== "FINISHED");
+
   // Group by stage in display order
   const grouped = STAGE_ORDER.reduce((acc, stage) => {
-    const ms = matches.filter(m => m.stage === stage);
+    const ms = visibleMatches.filter(m => m.stage === stage);
     if (ms.length) acc.push({ stage, matches: ms });
     return acc;
   }, []);
@@ -131,7 +135,7 @@ export default function ResultsTab({ adminToken, session }) {
   return (
     <div className="results-tab">
       <div className="results-toolbar">
-        {adminToken && (
+        {adminToken && mode === "results" && (
           <button className="btn-primary" onClick={handleSync} disabled={syncing}>
             {syncing ? "Syncing…" : "Sync Results"}
           </button>
@@ -140,9 +144,10 @@ export default function ResultsTab({ adminToken, session }) {
         {error && <span style={{ color: "#f87171", fontSize: "0.8rem" }}>{error}</span>}
       </div>
 
-      {matches.length === 0 && !error && (
+      {visibleMatches.length === 0 && !error && (
         <p style={{ color: "#64748b", padding: "16px" }}>
-          No results yet.{adminToken ? " Click Sync Results to fetch fixtures." : ""}
+          {mode === "results" ? "No results yet." : "No upcoming fixtures."}
+          {mode === "results" && adminToken ? " Click Sync Results to fetch fixtures." : ""}
         </p>
       )}
 

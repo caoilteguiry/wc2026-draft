@@ -108,7 +108,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
 
       {/* Tab bar */}
       <div className="tab-bar">
-        {["draft", "results", "leaderboard"].map(tab => (
+        {["draft", "results", "fixtures", "leaderboard"].map(tab => (
           <button
             key={tab}
             className={`tab-btn ${activeTab === tab ? "tab-active" : ""}`}
@@ -119,7 +119,8 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
         ))}
       </div>
 
-      {activeTab === "results" && <ResultsTab adminToken={adminToken} session={session} />}
+      {activeTab === "results" && <ResultsTab adminToken={adminToken} session={session} mode="results" />}
+      {activeTab === "fixtures" && <ResultsTab adminToken={adminToken} session={session} mode="fixtures" />}
       {activeTab === "leaderboard" && <LeaderboardTab sessionToken={sessionToken} />}
 
       {activeTab === "draft" && <>
