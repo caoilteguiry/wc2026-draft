@@ -355,6 +355,131 @@ body {
   margin-left: auto;
 }
 
+/* Bracket tab */
+.bracket-tab {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bracket-stage-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.bracket-stage-btn {
+  background: #131c2e;
+  border: 1px solid #1d2d44;
+  color: #4e6580;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.bracket-stage-btn:hover { color: #e8edf5; }
+
+.bracket-stage-btn.bracket-stage-active {
+  background: #1d2d44;
+  color: #f5a623;
+  border-color: #f5a623;
+}
+
+.bracket-swipe-hint {
+  font-size: 0.7rem;
+  color: #2a3a4d;
+  text-align: center;
+}
+
+.bracket-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bracket-match {
+  background: #131c2e;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px;
+}
+
+.bracket-team {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bracket-team img {
+  width: 22px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.bracket-team-home {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.bracket-team-away {
+  flex-direction: row;
+  text-align: left;
+}
+
+.bracket-team-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.bracket-team-name {
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bracket-team-player {
+  font-size: 0.7rem;
+  color: #f5a623;
+}
+
+.bracket-tbd {
+  opacity: 0.5;
+}
+
+.bracket-tbd-label {
+  font-size: 0.72rem;
+  color: #4e6580;
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bracket-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 60px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
 .team-card.team-active {
   background: #0d2b1a;
   border-left: 3px solid #22c55e;

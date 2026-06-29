@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { getTeams, getResults, startDraft, makePick, openSessionSocket } from "../api";
 import ResultsTab from "./ResultsTab";
 import LeaderboardTab from "./LeaderboardTab";
+import BracketTab from "./BracketTab";
 
 const KNOCKOUT_STAGES = new Set(["LAST_32", "LAST_16", "QUARTER_FINALS", "SEMI_FINALS", "THIRD_PLACE", "FINAL"]);
 
@@ -145,7 +146,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
 
       {/* Tab bar */}
       <div className="tab-bar">
-        {["draft", "results", "fixtures", "leaderboard"].map(tab => (
+        {["draft", "results", "fixtures", "bracket", "leaderboard"].map(tab => (
           <button
             key={tab}
             className={`tab-btn ${activeTab === tab ? "tab-active" : ""}`}
@@ -158,6 +159,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
 
       {activeTab === "results" && <ResultsTab adminToken={adminToken} session={session} mode="results" matches={matches} onMatchesUpdated={setMatches} />}
       {activeTab === "fixtures" && <ResultsTab adminToken={adminToken} session={session} mode="fixtures" matches={matches} onMatchesUpdated={setMatches} />}
+      {activeTab === "bracket" && <BracketTab matches={matches} session={session} />}
       {activeTab === "leaderboard" && <LeaderboardTab sessionToken={sessionToken} />}
 
       {activeTab === "draft" && <>
