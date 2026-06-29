@@ -355,6 +355,17 @@ body {
   margin-left: auto;
 }
 
+.team-card.team-active {
+  background: #0d2b1a;
+  border-left: 3px solid #22c55e;
+}
+
+.team-card.team-eliminated {
+  background: #1f0d0d;
+  border-left: 3px solid #ef4444;
+  opacity: 0.75;
+}
+
 .waiting-players {
   padding: 16px;
   display: flex;

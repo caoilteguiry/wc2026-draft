@@ -1,19 +1,55 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getTeams, startDraft, makePick, openSessionSocket } from "../api";
+import { getTeams, getResults, startDraft, makePick, openSessionSocket } from "../api";
 import ResultsTab from "./ResultsTab";
 import LeaderboardTab from "./LeaderboardTab";
 
+const KNOCKOUT_STAGES = new Set(["LAST_32", "LAST_16", "QUARTER_FINALS", "SEMI_FINALS", "THIRD_PLACE", "FINAL"]);
+
+// Derives a status for each team based on match data.
+// Green  = has at least one non-FINISHED match (confirmed upcoming/live)
+// Red    = lost a knockout match and has no upcoming fixture (definitively eliminated)
+// Neutral = everything else, including:
+//   - teams that won their last knockout match but have no next fixture yet scheduled
+//     (common mid-tournament when next round fixtures aren't published yet)
+//   - teams only seen in GROUP_STAGE (group elimination requires complex table logic
+//     including best-3rd-place rules, so we don't attempt to detect it here)
+//   - teams with no match data at all
+function deriveTeamStatuses(matches) {
+  const hasUpcoming = new Set();
+  const knockoutLosers = new Set();
+
+  for (const m of matches) {
+    if (m.status !== "FINISHED") {
+      if (m.home_team?.id) hasUpcoming.add(m.home_team.id);
+      if (m.away_team?.id) hasUpcoming.add(m.away_team.id);
+    } else if (KNOCKOUT_STAGES.has(m.stage) && m.winner && m.winner !== "DRAW") {
+      const loserId = m.winner === "HOME_TEAM" ? m.away_team?.id : m.home_team?.id;
+      if (loserId) knockoutLosers.add(loserId);
+    }
+  }
+
+  return { hasUpcoming, knockoutLosers };
+}
+
+function teamStatusClass(teamId, { hasUpcoming, knockoutLosers }) {
+  if (hasUpcoming.has(teamId)) return "team-active";
+  if (knockoutLosers.has(teamId)) return "team-eliminated";
+  return "";
+}
+
 export default function DraftBoard({ sessionToken, adminToken, playerId, playerName }) {
   const [teams, setTeams] = useState([]);
+  const [matches, setMatches] = useState([]);
   const [session, setSession] = useState(null);
   const [error, setError] = useState(null);
   const [secondsLeft, setSecondsLeft] = useState(null);
   const [activeTab, setActiveTab] = useState("draft");
   const wsRef = useRef(null);
 
-  // Load teams once
+  // Load teams and matches once
   useEffect(() => {
     getTeams().then(setTeams).catch((e) => setError(e.message));
+    getResults().then(setMatches).catch(() => {});
   }, []);
 
   // Open WebSocket and keep session state in sync
@@ -75,6 +111,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
 
   const isMyTurn = session.status === "drafting" && session.current_player_id === playerId;
   const currentPlayer = session.players.find((p) => p.id === session.current_player_id);
+  const teamStatuses = deriveTeamStatuses(matches);
 
   function picksForPlayer(pid) {
     return session.picks
@@ -119,8 +156,8 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
         ))}
       </div>
 
-      {activeTab === "results" && <ResultsTab adminToken={adminToken} session={session} mode="results" />}
-      {activeTab === "fixtures" && <ResultsTab adminToken={adminToken} session={session} mode="fixtures" />}
+      {activeTab === "results" && <ResultsTab adminToken={adminToken} session={session} mode="results" matches={matches} onMatchesUpdated={setMatches} />}
+      {activeTab === "fixtures" && <ResultsTab adminToken={adminToken} session={session} mode="fixtures" matches={matches} onMatchesUpdated={setMatches} />}
       {activeTab === "leaderboard" && <LeaderboardTab sessionToken={sessionToken} />}
 
       {activeTab === "draft" && <>
@@ -186,7 +223,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
               {poolTeams.map((team) => (
                 <div
                   key={team.id}
-                  className={`team-card ${isMyTurn ? "clickable" : ""}`}
+                  className={`team-card ${isMyTurn ? "clickable" : ""} ${teamStatusClass(team.id, teamStatuses)}`}
                   onClick={() => isMyTurn && handlePick(team.id)}
                 >
                   {team.crest_url && (
@@ -215,7 +252,7 @@ export default function DraftBoard({ sessionToken, adminToken, playerId, playerN
                   {playerPicks.map((pick) => {
                     const team = teamMap[pick.team_id];
                     return (
-                      <div key={pick.pick_number} className="team-card">
+                      <div key={pick.pick_number} className={`team-card ${teamStatusClass(pick.team_id, teamStatuses)}`}>
                         {team?.crest_url && (
                           <img src={team.crest_url} alt="" onError={(e) => (e.target.style.display = "none")} />
                         )}

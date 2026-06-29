@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { getResults, syncResults } from "../api";
 
 const STAGE_ORDER = [
@@ -88,7 +88,7 @@ function MatchRow({ match, teamPlayerMap }) {
   );
 }
 
-export default function ResultsTab({ adminToken, session, mode = "results" }) {
+export default function ResultsTab({ adminToken, session, mode = "results", matches = [], onMatchesUpdated }) {
   // Map team_id → player name from the session's picks
   const teamPlayerMap = {};
   if (session) {
@@ -97,14 +97,9 @@ export default function ResultsTab({ adminToken, session, mode = "results" }) {
       teamPlayerMap[pick.team_id] = playerById[pick.player_id];
     }
   }
-  const [matches, setMatches] = useState([]);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState(null);
   const [lastSynced, setLastSynced] = useState(null);
-
-  useEffect(() => {
-    getResults().then(setMatches).catch(e => setError(e.message));
-  }, []);
 
   async function handleSync() {
     setSyncing(true);
@@ -112,7 +107,7 @@ export default function ResultsTab({ adminToken, session, mode = "results" }) {
     try {
       await syncResults(adminToken);
       const fresh = await getResults();
-      setMatches(fresh);
+      onMatchesUpdated?.(fresh);
       setLastSynced(new Date().toLocaleTimeString());
     } catch (e) {
       setError(e.message);
